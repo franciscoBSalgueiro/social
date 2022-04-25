@@ -3,6 +3,7 @@ name = "social"
 version = "0.1.0"
 authors = ["Francisco Salgueiro <fgcdbs@gmail.com>"]
 description = "Command line tool to fetch the menu of the IST Alameda canteen"
+readme = "README.md"
 homepage = "https://github.com/franciscoBSalgueiro/social"
 repository = "https://github.com/franciscoBSalgueiro/social"
 keywords = ["cli", "search", "demo"]

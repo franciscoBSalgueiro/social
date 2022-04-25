@@ -1,9 +1,8 @@
 use ansi_term::{Colour, Style};
 use chrono::Datelike;
-use clap::Parser;
+use clap::{ArgEnum, Parser};
 use select::{document::Document, predicate::Attr};
 
-const WEEK_DAYS_SHORT: [&str; 5] = ["seg", "ter", "qua", "qui", "sex"];
 const WEEK_DAYS: [&str; 5] = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 
 fn ementa(day: usize, all: bool) {
@@ -35,18 +34,27 @@ fn ementa(day: usize, all: bool) {
     }
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum, Debug)]
+enum WeekdayArg {
+    Seg,
+    Ter,
+    Qua,
+    Qui,
+    Sex,
+}
+
 /// Command line tool to fetch the menu of the IST Alameda canteen
 ///
 /// When no argument is provided, today's menu is shown
 #[derive(Parser, Debug)]
 struct Args {
-    /// Show all the menus of the week
+    /// Prints all the menus of the week
     #[clap(short, long)]
     all: bool,
 
-    /// Shows the menu from the specified day
-    #[clap(short, long)]
-    day: Option<String>,
+    /// Prints the menu from that day
+    #[clap(short, long, arg_enum)]
+    day: Option<WeekdayArg>,
 }
 
 fn main() {
@@ -54,13 +62,11 @@ fn main() {
 
     // Convert the day argument from week day to an integer starting in monday with 0
     let day = match args.day {
-        Some(day) => WEEK_DAYS_SHORT
-            .iter()
-            .position(|&x| day.to_ascii_lowercase().contains(&x))
-            .unwrap_or_else(|| {
-                eprintln!("Invalid day argument\nValid days are: {}", WEEK_DAYS_SHORT.join(", "));
-                std::process::exit(1);
-            }),
+        Some(WeekdayArg::Seg) => 0,
+        Some(WeekdayArg::Ter) => 1,
+        Some(WeekdayArg::Qua) => 2,
+        Some(WeekdayArg::Qui) => 3,
+        Some(WeekdayArg::Sex) => 4,
         None => chrono::offset::Local::today()
             .weekday()
             .num_days_from_monday()
