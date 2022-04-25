@@ -3,29 +3,29 @@ use chrono::Datelike;
 use clap::Parser;
 use select::{document::Document, predicate::Attr};
 
-const DIAS_DA_SEMANA: [&str; 5] = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+const WEEK_DAYS_SHORT: [&str; 5] = ["seg", "ter", "qua", "qui", "sex"];
+const WEEK_DAYS: [&str; 5] = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 
-fn ementa(dia: Option<usize>, all: bool) {
+fn ementa(dia: usize, all: bool) {
     let url = "https://www.sas.ulisboa.pt/unidade-alimentar-tecnico-alameda";
     let response = reqwest::blocking::get(url).unwrap().text().unwrap();
     let document = Document::from(response.as_str());
     let mut i = 0;
     for node in document.find(Attr("class", "menus")) {
-        if all || i == dia.unwrap() {
+        if all || i == dia {
             for child in node.children() {
                 for subchild in child.children() {
-                    let mut texto = subchild.text();
-                    if texto != "" && !texto.contains("Alameda") && texto != "Linha" {
-                        if texto.contains("2022") {
-                            texto = format!("{}-Feira - {}", DIAS_DA_SEMANA[i], texto);
-                            println!("\n{}", Style::new().bold().underline().paint(texto));
-                        } else if texto == "Almoço" || texto == "Jantar" || texto == "Macrobiótica"
-                        {
-                            println!("\n{}", Style::new().bold().paint(texto));
-                        } else if texto.contains("Contêm") {
-                            println!("{}", Colour::Red.paint(texto));
+                    let mut text = subchild.text();
+                    if text != "" && !text.contains("Alameda") && text != "Linha" {
+                        if text.contains("202") {
+                            text = format!("{}-Feira - {}", WEEK_DAYS[i], text);
+                            println!("\n{}", Style::new().bold().underline().paint(text));
+                        } else if text == "Almoço" || text == "Jantar" || text == "Macrobiótica" {
+                            println!("\n{}", Style::new().bold().paint(text));
+                        } else if text.contains("Contêm") {
+                            println!("{}", Colour::Red.paint(text));
                         } else {
-                            println!("{}", texto);
+                            println!("{}", text);
                         }
                     }
                 }
@@ -35,30 +35,38 @@ fn ementa(dia: Option<usize>, all: bool) {
     }
 }
 
-/// Program to fetch the menu of the University of Lisbon
+/// Command line tool to fetch the menu of the University of Lisbon
+///
+/// When no argument is provided, today's menu is shown
 #[derive(Parser, Debug)]
-#[clap(about, long_about = None)]
 struct Args {
-    /// Show the menus from all days
+    /// Show all the menus of the week
     #[clap(short, long)]
     all: bool,
 
     /// Shows the menu from the specified day
     #[clap(short, long)]
-    day: Option<usize>,
+    day: Option<String>,
 }
 
 fn main() {
     let args = Args::parse();
 
-    if !args.all && args.day.is_none() {
-        let current_date: usize = chrono::offset::Local::today()
+    // Convert the day argument from week day to an integer starting in monday with 0
+    let day = match args.day {
+        Some(day) => WEEK_DAYS_SHORT
+            .iter()
+            .position(|&x| day.to_ascii_lowercase().contains(&x))
+            .unwrap_or_else(|| {
+                eprintln!("Invalid day argument\nValid days are: {}", WEEK_DAYS_SHORT.join(", "));
+                std::process::exit(1);
+            }),
+        None => chrono::offset::Local::today()
             .weekday()
             .num_days_from_monday()
             .try_into()
-            .unwrap();
-        ementa(Some(current_date), false);
-    } else {
-        ementa(args.day, args.all);
-    }
+            .unwrap(),
+    };
+
+    ementa(day, args.all);
 }
