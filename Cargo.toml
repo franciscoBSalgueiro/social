@@ -1,6 +1,12 @@
 [package]
 name = "social"
 version = "0.1.0"
+authors = ["Francisco Salgueiro <fgcdbs@gmail.com>"]
+description = "Command line tool to fetch the menu of the IST Alameda canteen"
+homepage = "https://github.com/franciscoBSalgueiro/social"
+repository = "https://github.com/franciscoBSalgueiro/social"
+keywords = ["cli", "search", "demo"]
+categories = ["command-line-utilities"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

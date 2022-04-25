@@ -35,7 +35,7 @@ fn ementa(day: usize, all: bool) {
     }
 }
 
-/// Command line tool to fetch the menu of the University of Lisbon
+/// Command line tool to fetch the menu of the IST Alameda canteen
 ///
 /// When no argument is provided, today's menu is shown
 #[derive(Parser, Debug)]
