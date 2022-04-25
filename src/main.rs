@@ -1,15 +1,43 @@
-use ansi_term::{Colour, Style};
 use chrono::Datelike;
 use clap::{ArgEnum, Parser};
 use select::{document::Document, predicate::Attr};
+use termion::{color, style};
 
-const WEEK_DAYS: [&str; 5] = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+const WEEK_DAYS: [&str; 5] = [
+    "Segunda-Feira",
+    "Terça-Feira",
+    "Quarta-Feira",
+    "Quinta-Feira",
+    "Sexta-Feira",
+];
+
+#[macro_export]
+macro_rules! bold {
+    ($text:expr) => {
+        format!("{}{}{}", style::Bold, $text, style::Reset)
+    };
+}
+
+#[macro_export]
+macro_rules! underline {
+    ($text:expr) => {
+        format!("{}{}{}", style::Underline, $text, style::Reset)
+    };
+}
+
+#[macro_export]
+macro_rules! red {
+    ($text:expr) => {
+        format!("{}{}{}", color::Fg(color::Red), $text, style::Reset)
+    };
+}
 
 fn ementa(day: usize, all: bool) {
     let url = "https://www.sas.ulisboa.pt/unidade-alimentar-tecnico-alameda";
     let response = reqwest::blocking::get(url).unwrap().text().unwrap();
     let document = Document::from(response.as_str());
     let mut i = 0;
+    let mut first = true;
     for node in document.find(Attr("class", "menus")) {
         if all || i == day {
             for child in node.children() {
@@ -17,12 +45,16 @@ fn ementa(day: usize, all: bool) {
                     let mut text = subchild.text();
                     if text != "" && !text.contains("Alameda") && text != "Linha" {
                         if text.contains("202") {
-                            text = format!("{}-Feira - {}", WEEK_DAYS[i], text);
-                            println!("\n{}", Style::new().bold().underline().paint(text));
+                            text = format!("{} - {}", WEEK_DAYS[i], text);
+                            if !first {
+                                println!("");
+                            }
+                            first = false;
+                            println!("{}", underline!(bold!(text)));
                         } else if text == "Almoço" || text == "Jantar" || text == "Macrobiótica" {
-                            println!("\n{}", Style::new().bold().paint(text));
+                            println!("\n{}", bold!(text));
                         } else if text.contains("Contêm") {
-                            println!("{}", Colour::Red.paint(text));
+                            println!("{}", red!(text));
                         } else {
                             println!("{}", text);
                         }
