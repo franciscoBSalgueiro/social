@@ -8,8 +8,8 @@ USAGE:
     social [OPTIONS]
 
 OPTIONS:
-    -a, --all          Show all the menus of the week
-    -d, --day <DAY>    Shows the menu from the specified day
+    -a, --all          Prints all the menus of the week
+    -d, --day <DAY>    Prints the menu from that day [possible values: seg, ter, qua, qui, sex]
     -h, --help         Print help information
 ```
 
