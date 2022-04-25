@@ -6,13 +6,13 @@ use select::{document::Document, predicate::Attr};
 const WEEK_DAYS_SHORT: [&str; 5] = ["seg", "ter", "qua", "qui", "sex"];
 const WEEK_DAYS: [&str; 5] = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 
-fn ementa(dia: usize, all: bool) {
+fn ementa(day: usize, all: bool) {
     let url = "https://www.sas.ulisboa.pt/unidade-alimentar-tecnico-alameda";
     let response = reqwest::blocking::get(url).unwrap().text().unwrap();
     let document = Document::from(response.as_str());
     let mut i = 0;
     for node in document.find(Attr("class", "menus")) {
-        if all || i == dia {
+        if all || i == day {
             for child in node.children() {
                 for subchild in child.children() {
                     let mut text = subchild.text();
